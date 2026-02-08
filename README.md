@@ -33,8 +33,8 @@ All dependencies (`yt-dlp`, `openai-whisper`, `imageio-ffmpeg`) are installed au
 1. Clone the repo (if not already):
 
 ```bash
-git clone <repo_url>
-cd <repo_folder>
+git clone git@github.com:saksham-gt/youtube-transcript-automation.git
+cd youtube-transcript-automation
 ```
 
 2. Run the transcription script:
