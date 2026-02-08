@@ -102,8 +102,10 @@ if [ ! -d "$VENV_DIR" ]; then
     
     echo -e "${GREEN}[2/6] Installing dependencies...${NC}"
     source "$VENV_DIR/bin/activate"
-    pip install --upgrade pip > /dev/null 2>&1
-    pip install yt-dlp openai-whisper imageio-ffmpeg
+    echo "  → Upgrading pip..."
+    pip install --upgrade pip --quiet
+    echo "  → Installing yt-dlp, whisper, and ffmpeg..."
+    pip install yt-dlp openai-whisper imageio-ffmpeg --quiet
     echo "✓ Dependencies installed"
     echo ""
 else
@@ -125,7 +127,7 @@ echo ""
 
 # Step 3: Get video title
 echo -e "${GREEN}[4/6] Fetching video information...${NC}"
-VIDEO_TITLE=$(yt-dlp --remote-components ejs:github --print "%(title)s" --no-download "$YOUTUBE_URL" 2>/dev/null || echo "video")
+VIDEO_TITLE=$(yt-dlp --remote-components ejs:github --print "%(title)s" --no-download --no-warnings "$YOUTUBE_URL" 2>/dev/null || echo "video")
 # Sanitize filename
 VIDEO_TITLE=$(echo "$VIDEO_TITLE" | sed 's/[^a-zA-Z0-9 _-]//g' | sed 's/  */ /g' | xargs)
 echo "✓ Video: $VIDEO_TITLE"
@@ -140,6 +142,8 @@ yt-dlp \
     --audio-format mp3 \
     --audio-quality 0 \
     --output "$TEMP_AUDIO" \
+    --progress \
+    --no-warnings \
     "$YOUTUBE_URL"
 echo "✓ Audio downloaded"
 echo ""
@@ -150,17 +154,25 @@ echo "Model: $WHISPER_MODEL"
 echo "Output formats: $OUTPUT_FORMATS"
 if [ -n "$LANGUAGE" ]; then
     echo "Language: $LANGUAGE"
+fi
+echo ""
+echo -e "${YELLOW}Processing... (progress will be shown below)${NC}"
+
+if [ -n "$LANGUAGE" ]; then
     whisper "$TEMP_AUDIO" \
         --model "$WHISPER_MODEL" \
         --language "$LANGUAGE" \
         --output_dir "$TRANSCRIPTS_DIR" \
-        --output_format "$OUTPUT_FORMATS"
+        --output_format "$OUTPUT_FORMATS" \
+        --verbose False 2>&1 | grep -E "(Detecting language|Loading|100%|^$)" || true
 else
     whisper "$TEMP_AUDIO" \
         --model "$WHISPER_MODEL" \
         --output_dir "$TRANSCRIPTS_DIR" \
-        --output_format "$OUTPUT_FORMATS"
+        --output_format "$OUTPUT_FORMATS" \
+        --verbose False 2>&1 | grep -E "(Detecting language|Loading|100%|^$)" || true
 fi
+echo ""
 echo "✓ Transcription complete"
 echo ""
 

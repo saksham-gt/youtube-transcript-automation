@@ -14,6 +14,7 @@ All transcripts are stored in the `youtube-transcripts` folder inside the repo.
 - Optional language specification for faster transcription
 - Automatic cleanup of temporary audio files
 - Beginner-friendly: run the script directly, no manual setup
+- Clean progress output without verbose terminal spam
 
 ---
 
