@@ -127,7 +127,7 @@ echo ""
 
 # Step 3: Get video title
 echo -e "${GREEN}[4/6] Fetching video information...${NC}"
-VIDEO_TITLE=$(yt-dlp --remote-components ejs:github --print "%(title)s" --no-download --no-warnings "$YOUTUBE_URL" 2>/dev/null || echo "video")
+VIDEO_TITLE=$(yt-dlp --print "%(title)s" --no-download --no-warnings "$YOUTUBE_URL" 2>/dev/null || echo "video")
 # Sanitize filename
 VIDEO_TITLE=$(echo "$VIDEO_TITLE" | sed 's/[^a-zA-Z0-9 _-]//g' | sed 's/  */ /g' | xargs)
 echo "✓ Video: $VIDEO_TITLE"
@@ -137,7 +137,6 @@ echo ""
 echo -e "${GREEN}[5/6] Downloading audio...${NC}"
 TEMP_AUDIO="/tmp/${VIDEO_TITLE}_$$.mp3"
 yt-dlp \
-    --remote-components ejs:github \
     --extract-audio \
     --audio-format mp3 \
     --audio-quality 0 \
@@ -158,20 +157,19 @@ fi
 echo ""
 echo -e "${YELLOW}Processing... (progress will be shown below)${NC}"
 
+WHISPER_ARGS=(
+    "$TEMP_AUDIO"
+    --model "$WHISPER_MODEL"
+    --output_dir "$TRANSCRIPTS_DIR"
+    --output_format "$OUTPUT_FORMATS"
+    --verbose False
+)
+
 if [ -n "$LANGUAGE" ]; then
-    whisper "$TEMP_AUDIO" \
-        --model "$WHISPER_MODEL" \
-        --language "$LANGUAGE" \
-        --output_dir "$TRANSCRIPTS_DIR" \
-        --output_format "$OUTPUT_FORMATS" \
-        --verbose False 2>&1 | grep -E "(Detecting language|Loading|100%|^$)" || true
-else
-    whisper "$TEMP_AUDIO" \
-        --model "$WHISPER_MODEL" \
-        --output_dir "$TRANSCRIPTS_DIR" \
-        --output_format "$OUTPUT_FORMATS" \
-        --verbose False 2>&1 | grep -E "(Detecting language|Loading|100%|^$)" || true
+    WHISPER_ARGS+=(--language "$LANGUAGE")
 fi
+
+whisper "${WHISPER_ARGS[@]}" 2>&1 | grep -E "(Detecting language|Loading|100%|^$)" || true
 echo ""
 echo "✓ Transcription complete"
 echo ""
