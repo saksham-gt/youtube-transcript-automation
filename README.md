@@ -22,9 +22,11 @@ All transcripts are stored in the `youtube-transcripts` folder inside the repo.
 
 - macOS or Linux
 - Python 3.8+
+- Homebrew (macOS) or apt/yum (Linux) for automatic ffmpeg installation
 - Git (optional, if cloning the repo)
 
-All dependencies (`yt-dlp`, `openai-whisper`, `imageio-ffmpeg`) are installed automatically in the `.venv`.
+All Python dependencies (`yt-dlp`, `openai-whisper`) are installed automatically in the `.venv`.
+System ffmpeg is installed automatically if not present.
 
 ---
 
@@ -114,6 +116,24 @@ source .venv/bin/activate
 ---
 
 ## Troubleshooting
+
+### FFmpeg Installation
+
+The script automatically installs ffmpeg if it's not found:
+- **macOS**: Uses Homebrew (`brew install ffmpeg`)
+- **Linux**: Uses apt or yum (`apt-get install ffmpeg` or `yum install ffmpeg`)
+
+If automatic installation fails, install manually:
+```bash
+# macOS
+brew install ffmpeg
+
+# Linux (Debian/Ubuntu)
+sudo apt-get install ffmpeg
+
+# Linux (RHEL/CentOS)
+sudo yum install ffmpeg
+```
 
 ### YouTube Download Issues
 

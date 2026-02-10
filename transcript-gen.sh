@@ -85,6 +85,46 @@ echo -e "${BLUE}YouTube Transcription Automation${NC}"
 echo -e "${BLUE}========================================${NC}"
 echo ""
 
+# Check and install ffmpeg if needed
+if ! command -v ffmpeg &> /dev/null; then
+    echo -e "${YELLOW}⚠ ffmpeg not found, installing...${NC}"
+
+    # Detect OS and install ffmpeg
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS
+        if command -v brew &> /dev/null; then
+            echo "  → Installing ffmpeg via Homebrew..."
+            brew install ffmpeg
+            echo "✓ ffmpeg installed"
+        else
+            echo -e "${RED}Error: Homebrew not found. Please install ffmpeg manually:${NC}"
+            echo "  brew install ffmpeg"
+            exit 1
+        fi
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        # Linux
+        if command -v apt-get &> /dev/null; then
+            echo "  → Installing ffmpeg via apt..."
+            sudo apt-get update && sudo apt-get install -y ffmpeg
+            echo "✓ ffmpeg installed"
+        elif command -v yum &> /dev/null; then
+            echo "  → Installing ffmpeg via yum..."
+            sudo yum install -y ffmpeg
+            echo "✓ ffmpeg installed"
+        else
+            echo -e "${RED}Error: Package manager not found. Please install ffmpeg manually.${NC}"
+            exit 1
+        fi
+    else
+        echo -e "${RED}Error: Unsupported OS. Please install ffmpeg manually.${NC}"
+        exit 1
+    fi
+    echo ""
+else
+    echo "✓ ffmpeg found"
+    echo ""
+fi
+
 # Check for Node.js (recommended for YouTube challenges)
 if ! command -v node &> /dev/null; then
     echo -e "${YELLOW}⚠ Warning: Node.js not found${NC}"
@@ -104,8 +144,8 @@ if [ ! -d "$VENV_DIR" ]; then
     source "$VENV_DIR/bin/activate"
     echo "  → Upgrading pip..."
     pip install --upgrade pip --quiet
-    echo "  → Installing yt-dlp, whisper, and ffmpeg..."
-    pip install yt-dlp openai-whisper imageio-ffmpeg --quiet
+    echo "  → Installing yt-dlp and whisper..."
+    pip install yt-dlp openai-whisper --quiet
     echo "✓ Dependencies installed"
     echo ""
 else
