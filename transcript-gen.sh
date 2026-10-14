@@ -145,7 +145,7 @@ if [ ! -d "$VENV_DIR" ]; then
     echo "  → Upgrading pip..."
     pip install --upgrade pip --quiet
     echo "  → Installing yt-dlp and whisper..."
-    pip install yt-dlp openai-whisper --quiet
+    pip install "yt-dlp[default]" openai-whisper --quiet
     echo "✓ Dependencies installed"
     echo ""
 else
@@ -156,6 +156,9 @@ else
     echo -e "${GREEN}[2/6] Activating virtual environment...${NC}"
     source "$VENV_DIR/bin/activate"
     echo "✓ Virtual environment activated"
+    # YouTube changes often; a stale yt-dlp is the usual cause of 403 errors
+    echo "  → Updating yt-dlp..."
+    pip install -U "yt-dlp[default]" --quiet
     echo ""
 fi
 
